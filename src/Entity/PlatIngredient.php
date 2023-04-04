@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Entity\Plat;
+use App\Entity\Ingredients;
 use App\Repository\PlatIngredientRepository;
 use Doctrine\ORM\Mapping as ORM;
 

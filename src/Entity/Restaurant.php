@@ -3,6 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\RestaurantRepository;
+use App\Repository\AddressRepository;
+use App\Entity\Address;
+use App\Entity\Menu;
+use App\Entity\Plat;
+use App\Entity\PlatIngredient;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -22,6 +28,7 @@ class Restaurant
     private ?string $director = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
     private ?address $address_id = null;
 
     #[ORM\OneToMany(mappedBy: 'restaurant_id', targetEntity: Menu::class)]
@@ -65,12 +72,12 @@ class Restaurant
         return $this;
     }
 
-    public function getAddressId(): ?address
+    public function getAddressId(): ?Address
     {
         return $this->address_id;
     }
 
-    public function setAddressId(?address $address_id): self
+    public function setAddressId(?Address $address_id): self
     {
         $this->address_id = $address_id;
 

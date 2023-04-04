@@ -22,6 +22,12 @@ class Address
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Restaurant", mappedBy="address")
+     */
+    private $restaurant;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -59,6 +65,17 @@ class Address
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+    public function getRestaurant(): ?Restaurant
+    {
+        return $this->restaurant;
+    }
+
+    public function setRestaurant(?Restaurant $restaurant): self
+    {
+        $this->restaurant = $restaurant;
 
         return $this;
     }
