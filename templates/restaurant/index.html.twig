@@ -9,17 +9,21 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h1>Hello ! ✅</h1>
 
     This friendly message is coming from:
     <ul>
-        {% for restaurant in restaurants %}
-            <h2>{{ restaurant.name }}</h2>
-            <p>Directeur: {{ restaurant.director }}</p>
-            {% if restaurant.address is not null %}
-                <p>Adresse: {{ restaurant.address.city }}</p>
-            {% endif %}
-        {% endfor %}
+        {% if restaurants is empty %}
+            <p>Aucun restaurant trouvé.</p>
+        {% else %}
+            {% for restaurant in restaurants %}
+                <h2>{{ restaurant.name }}</h2>
+                <p>Directeur: {{ restaurant.director }}</p>
+                {% if restaurant.address is not null %}
+                    <p>Adresse: {{ restaurant.address.city }}</p>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
     </ul>
 </div>
 {% endblock %}

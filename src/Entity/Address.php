@@ -22,11 +22,8 @@ class Address
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Restaurant", mappedBy="address")
-     */
-    private $restaurant;
-
+    #[ORM\OneToOne(mappedBy: 'address', cascade: ['persist', 'remove'])]
+    private ?Restaurant $restaurant = null;
 
     public function getId(): ?int
     {
@@ -68,13 +65,19 @@ class Address
 
         return $this;
     }
+
     public function getRestaurant(): ?Restaurant
     {
         return $this->restaurant;
     }
 
-    public function setRestaurant(?Restaurant $restaurant): self
+    public function setRestaurant(Restaurant $restaurant): self
     {
+        // set the owning side of the relation if necessary
+        if ($restaurant->getAddress() !== $this) {
+            $restaurant->setAddress($this);
+        }
+
         $this->restaurant = $restaurant;
 
         return $this;

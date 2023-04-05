@@ -19,22 +19,23 @@ class Plat
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'plats')]
-    private ?restaurant $restaurant_id = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0')]
     private ?string $price = null;
 
-    #[ORM\OneToMany(mappedBy: 'plat_id', targetEntity: MenuPlat::class)]
-    private Collection $menuPlats;
+    #[ORM\ManyToOne(inversedBy: 'plats')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Restaurant $restaurant = null;
 
-    #[ORM\OneToMany(mappedBy: 'plat_id', targetEntity: PlatIngredient::class)]
-    private Collection $platIngredients;
+    #[ORM\ManyToMany(targetEntity: Ingredient::class, inversedBy: 'plats')]
+    private Collection $ingredients;
+
+    #[ORM\ManyToMany(targetEntity: Menu::class, mappedBy: 'plats')]
+    private Collection $menus;
 
     public function __construct()
     {
-        $this->menuPlats = new ArrayCollection();
-        $this->platIngredients = new ArrayCollection();
+        $this->ingredients = new ArrayCollection();
+        $this->menus = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -54,18 +55,6 @@ class Plat
         return $this;
     }
 
-    public function getRestaurantId(): ?restaurant
-    {
-        return $this->restaurant_id;
-    }
-
-    public function setRestaurantId(?restaurant $restaurant_id): self
-    {
-        $this->restaurant_id = $restaurant_id;
-
-        return $this;
-    }
-
     public function getPrice(): ?string
     {
         return $this->price;
@@ -78,61 +67,64 @@ class Plat
         return $this;
     }
 
-    /**
-     * @return Collection<int, MenuPlat>
-     */
-    public function getMenuPlats(): Collection
+    public function getRestaurant(): ?Restaurant
     {
-        return $this->menuPlats;
+        return $this->restaurant;
     }
 
-    public function addMenuPlat(MenuPlat $menuPlat): self
+    public function setRestaurant(?Restaurant $restaurant): self
     {
-        if (!$this->menuPlats->contains($menuPlat)) {
-            $this->menuPlats->add($menuPlat);
-            $menuPlat->setPlatId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMenuPlat(MenuPlat $menuPlat): self
-    {
-        if ($this->menuPlats->removeElement($menuPlat)) {
-            // set the owning side to null (unless already changed)
-            if ($menuPlat->getPlatId() === $this) {
-                $menuPlat->setPlatId(null);
-            }
-        }
+        $this->restaurant = $restaurant;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, PlatIngredient>
+     * @return Collection<int, Ingredient>
      */
-    public function getPlatIngredients(): Collection
+    public function getIngredients(): Collection
     {
-        return $this->platIngredients;
+        return $this->ingredients;
     }
 
-    public function addPlatIngredient(PlatIngredient $platIngredient): self
+    public function addIngredient(Ingredient $ingredient): self
     {
-        if (!$this->platIngredients->contains($platIngredient)) {
-            $this->platIngredients->add($platIngredient);
-            $platIngredient->setPlatId($this);
+        if (!$this->ingredients->contains($ingredient)) {
+            $this->ingredients->add($ingredient);
         }
 
         return $this;
     }
 
-    public function removePlatIngredient(PlatIngredient $platIngredient): self
+    public function removeIngredient(Ingredient $ingredient): self
     {
-        if ($this->platIngredients->removeElement($platIngredient)) {
-            // set the owning side to null (unless already changed)
-            if ($platIngredient->getPlatId() === $this) {
-                $platIngredient->setPlatId(null);
-            }
+        $this->ingredients->removeElement($ingredient);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Menu>
+     */
+    public function getMenus(): Collection
+    {
+        return $this->menus;
+    }
+
+    public function addMenu(Menu $menu): self
+    {
+        if (!$this->menus->contains($menu)) {
+            $this->menus->add($menu);
+            $menu->addPlat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMenu(Menu $menu): self
+    {
+        if ($this->menus->removeElement($menu)) {
+            $menu->removePlat($this);
         }
 
         return $this;

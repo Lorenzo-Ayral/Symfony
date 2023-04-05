@@ -3,12 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\RestaurantRepository;
-use App\Repository\AddressRepository;
-use App\Entity\Address;
-use App\Entity\Menu;
-use App\Entity\Plat;
-use App\Entity\PlatIngredient;
-
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,20 +21,20 @@ class Restaurant
     #[ORM\Column(length: 255)]
     private ?string $director = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'restaurant', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?address $address_id = null;
+    private ?Address $address = null;
 
-    #[ORM\OneToMany(mappedBy: 'restaurant_id', targetEntity: Menu::class)]
-    private Collection $menus;
-
-    #[ORM\OneToMany(mappedBy: 'restaurant_id', targetEntity: Plat::class)]
+    #[ORM\OneToMany(mappedBy: 'restaurant', targetEntity: Plat::class)]
     private Collection $plats;
+
+    #[ORM\OneToMany(mappedBy: 'restaurant', targetEntity: Menu::class)]
+    private Collection $menus;
 
     public function __construct()
     {
-        $this->menus = new ArrayCollection();
         $this->plats = new ArrayCollection();
+        $this->menus = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -72,44 +66,14 @@ class Restaurant
         return $this;
     }
 
-    public function getAddressId(): ?Address
+    public function getAddress(): ?Address
     {
-        return $this->address_id;
+        return $this->address;
     }
 
-    public function setAddressId(?Address $address_id): self
+    public function setAddress(Address $address): self
     {
-        $this->address_id = $address_id;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Menu>
-     */
-    public function getMenus(): Collection
-    {
-        return $this->menus;
-    }
-
-    public function addMenu(Menu $menu): self
-    {
-        if (!$this->menus->contains($menu)) {
-            $this->menus->add($menu);
-            $menu->setRestaurantId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMenu(Menu $menu): self
-    {
-        if ($this->menus->removeElement($menu)) {
-            // set the owning side to null (unless already changed)
-            if ($menu->getRestaurantId() === $this) {
-                $menu->setRestaurantId(null);
-            }
-        }
+        $this->address = $address;
 
         return $this;
     }
@@ -126,7 +90,7 @@ class Restaurant
     {
         if (!$this->plats->contains($plat)) {
             $this->plats->add($plat);
-            $plat->setRestaurantId($this);
+            $plat->setRestaurant($this);
         }
 
         return $this;
@@ -136,8 +100,38 @@ class Restaurant
     {
         if ($this->plats->removeElement($plat)) {
             // set the owning side to null (unless already changed)
-            if ($plat->getRestaurantId() === $this) {
-                $plat->setRestaurantId(null);
+            if ($plat->getRestaurant() === $this) {
+                $plat->setRestaurant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Menu>
+     */
+    public function getMenus(): Collection
+    {
+        return $this->menus;
+    }
+
+    public function addMenu(Menu $menu): self
+    {
+        if (!$this->menus->contains($menu)) {
+            $this->menus->add($menu);
+            $menu->setRestaurant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMenu(Menu $menu): self
+    {
+        if ($this->menus->removeElement($menu)) {
+            // set the owning side to null (unless already changed)
+            if ($menu->getRestaurant() === $this) {
+                $menu->setRestaurant(null);
             }
         }
 

@@ -2,14 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\MenuRepository;
+use App\Repository\IngredientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: MenuRepository::class)]
-class Menu
+#[ORM\Entity(repositoryClass: IngredientRepository::class)]
+class Ingredient
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -19,14 +18,7 @@ class Menu
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0')]
-    private ?string $price = null;
-
-    #[ORM\ManyToOne(inversedBy: 'menus')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Restaurant $restaurant = null;
-
-    #[ORM\ManyToMany(targetEntity: Plat::class, inversedBy: 'menus')]
+    #[ORM\ManyToMany(targetEntity: Plat::class, mappedBy: 'ingredients')]
     private Collection $plats;
 
     public function __construct()
@@ -51,30 +43,6 @@ class Menu
         return $this;
     }
 
-    public function getPrice(): ?string
-    {
-        return $this->price;
-    }
-
-    public function setPrice(string $price): self
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
-    public function getRestaurant(): ?Restaurant
-    {
-        return $this->restaurant;
-    }
-
-    public function setRestaurant(?Restaurant $restaurant): self
-    {
-        $this->restaurant = $restaurant;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Plat>
      */
@@ -87,6 +55,7 @@ class Menu
     {
         if (!$this->plats->contains($plat)) {
             $this->plats->add($plat);
+            $plat->addIngredient($this);
         }
 
         return $this;
@@ -94,7 +63,9 @@ class Menu
 
     public function removePlat(Plat $plat): self
     {
-        $this->plats->removeElement($plat);
+        if ($this->plats->removeElement($plat)) {
+            $plat->removeIngredient($this);
+        }
 
         return $this;
     }
